@@ -126,21 +126,4 @@ class Request extends Epayment\BaseRequest implements Epayment\IRequest {
 
 		return $this->redirectUrl . '?' . http_build_query($params);
 	}
-
-	/**
-	 * Vrati verejnu IP
-	 * Je to potrebne pre testovanie triedy na lokalnej masine
-	 */
-	protected function getPublicIP() {
-		if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1') {
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, 'http://ip.devel.sk');
-			curl_setopt($ch, CURLOPT_HEADER, 0);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			$ip = curl_exec($ch);
-			curl_close($ch);
-			return trim($ip);
-		}
-		return $_SERVER['REMOTE_ADDR'];
-	}
 }
