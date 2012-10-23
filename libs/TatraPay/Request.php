@@ -1,23 +1,81 @@
 <?php
 
-namespace Epayment\CardPay;
+namespace Epayment\TatraPay;
 use Epayment;
 
 require_once __DIR__ . '/../IRequest.php';
-require_once __DIR__ . '/../TatraPay/Request.php';
+require_once __DIR__ . '/../BaseRequest.php';
 
 /**
- * Reqest objekt pre CardPay branu
+ * Reqest objekt pre TatraPay branu
  * @author Branislav Vaculčiak
  */
-class Request extends Epayment\TatraPay\Request implements Epayment\IRequest {
+class Request extends Epayment\BaseRequest implements Epayment\IRequest {
+
+	/** @const */
+	const BASE_URL = 'https://moja.tatrabanka.sk/cgi-bin/e-commerce/start/e-commerce.jsp';
+
+	/** @var string */
+	protected $redirectUrl = self::BASE_URL;
+
+	/** @var string */
+	protected $bankCode = '1100';
+
+	/** @var string */
+	protected $currency = 978;
+
+	/**
+	 * Nastavi parameter obchodnika, ktory bude zaslany naspat s odpovedi
+	 * @param string
+	 * @param string
+	 */
+	public function setParam($key, $value) {
+		throw new Epayment\Exception('CardPay brana nepodporuje prenos parametrov obchodnika');
+	}
+
+	/**
+	 * Podpise request tajnym klucom obchodnika
+	 * @param string tajny kluc obchodnika, ktorym podpisuje poziadavky
+	 * @return IRequest
+	 */
+	public function signMessage($secretKey) {
+		$signature = null;
+		if (!$this->isValid) {
+			throw new Epayment\Exception(__METHOD__ . ': Poziadavka zatial nebola validovana.');
+		}
+
+		try {
+			$bytesHash = sha1($this->getSignatureBase(), true);
+
+            // uprava pre PHP < 5.0
+            if (strlen($bytesHash) != 20) {
+                $bytes = "";
+                for ($i = 0; $i < strlen($bytesHash); $i+=2)
+                    $bytes .= chr(hexdec(substr($str, $i, 2)));
+                $bytesHash = $bytes;
+            }
+
+            $des = mcrypt_module_open(MCRYPT_DES, "", MCRYPT_MODE_ECB, "");
+            $iv = mcrypt_create_iv(mcrypt_enc_get_iv_size($des), MCRYPT_RAND);
+            mcrypt_generic_init($des, $secretKey, $iv);
+            $bytesSign = mcrypt_generic($des, substr($bytesHash, 0, 8));
+            mcrypt_generic_deinit($des);
+            mcrypt_module_close($des);
+            $signature = strtoupper(bin2hex($bytesSign));
+		} catch (\Exception $e) {
+			return false;
+		}
+
+		$this->sign = $signature;
+		return $this;
+	}
 
 	/**
 	 * Vrati zakladne data, ktore sa budu podpisovat
 	 * @return string
 	 */
 	protected function getSignatureBase() {
-		return "{$this->account}{$this->getFormatedPrice()}{$this->currency}{$this->getFormatedVS()}{$this->getFormatedCS()}{$this->returnUrl}{$this->getPublicIP()}{$this->getFormatedClientName()}";
+		return "{$this->account}{$this->getFormatedPrice()}{$this->currency}{$this->getFormatedVS()}{$this->getFormatedSS()}{$this->getFormatedCS()}{$this->returnUrl}";
 	}
 
 	/**
@@ -25,11 +83,11 @@ class Request extends Epayment\TatraPay\Request implements Epayment\IRequest {
 	 * @return boolean
 	 */
 	public function validate() {
-		if (empty($this->clientName)) throw new Epayment\Exception('Chyba v mene klienta');
 		if (!preg_match('/^[0-9a-z]{3,4}$/', $this->account)) throw new Epayment\Exception('Chyba v cisle uctu (MIT)');
 		if (!preg_match('/^([0-9]+|[0-9]*\\.[0-9]{0,2})$/', $this->getFormatedPrice())) throw new Epayment\Exception('Chyba vo formate ceny');
 		if ($this->currency != 978) throw new Epayment\Exception('Chyba v mene');
 		if (!preg_match('/^[0-9]{10}$/', $this->getFormatedVS())) throw new Epayment\Exception('Chyba vo formate VS');
+		if (!preg_match('/^[0-9]{10}$/', $this->getFormatedSS())) throw new Epayment\Exception('Chyba vo formate SS');
 		if (!preg_match('/^[0-9]{4}$/', $this->getFormatedCS())) throw new Epayment\Exception('Chyba vo formate CS');
 		if (preg_match('[\\;\\?\\&]', $this->returnUrl)) throw new Epayment\Exception('Chyba v navratovej URL');
 		return $this->isValid = true;
@@ -41,15 +99,14 @@ class Request extends Epayment\TatraPay\Request implements Epayment\IRequest {
 	 */
 	public function getRedirectUrl() {
 		$params = array(
-			'PT' => 'CardPay',
+			'PT' => 'TatraPay',
 			'MID' => $this->account,
 			'AMT' => $this->getFormatedPrice(),
 			'CURR' => $this->currency,
 			'VS' => $this->getFormatedVS(),
 			'CS' => $this->getFormatedCS(),
+			'SS' => $this->getFormatedSS(),
 			'RURL' => $this->returnUrl,
-			'NAME' => $this->getFormatedClientName(),
-			'IPC' => $this->getPublicIP(),
 			'SIGN' => $this->sign
 		);
 
