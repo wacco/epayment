@@ -31,7 +31,13 @@ abstract class BaseResponse implements IResponse {
 	protected $clientBankCode;
 
 	/** @var string */
+	protected $clientName;
+
+	/** @var string */
 	protected $vs;
+
+	/** @var string */
+	protected $cs;
 
 	/** @var string */
 	protected $ss;
@@ -56,6 +62,14 @@ abstract class BaseResponse implements IResponse {
 
 	/** @var boolean */
 	protected $isVerified = false;
+
+	/**
+	 * Vrati meno klienta
+	 * @return string
+	 */
+	protected function getClientName() {
+		return urldecode($this->clientName);
+	}
 
 	/**
 	 * Vrati prefix uctu
@@ -127,6 +141,14 @@ abstract class BaseResponse implements IResponse {
 	 */
 	public function getVS() {
 		return $this->vs;
+	}
+
+	/**
+	 * Vrati konstantny symbol
+	 * @return string
+	 */
+	public function getCS() {
+		return $this->cs;
 	}
 
 	/**

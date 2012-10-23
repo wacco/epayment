@@ -18,6 +18,13 @@ interface IRequest {
 	public function __construct($account, $accountPrefix);
 
 	/**
+	 * Nastavi meno klienta
+	 * @param string
+	 * @return IRequest
+	 */
+	public function setClientName($fullname);
+
+	/**
 	 * Nastavi cenu
 	 * @param float
 	 * @return IRequest
@@ -30,6 +37,13 @@ interface IRequest {
 	 * @return IRequest
 	 */
 	public function setVS($vs);
+
+	/**
+	 * Nastavi konstantny symbol
+	 * @param string
+	 * @return IRequest
+	 */
+	public function setCS($cs);
 
 	/**
 	 * Nastavi specificky symbol

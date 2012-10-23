@@ -28,6 +28,7 @@ if ($response->validate() && $response->verifySignature($secretKey)) {
 	echo "Mena: " . $response->getCurrency() . "<br>";
 	echo "VS: " . $response->getVS() . "<br>";
 	echo "SS: " . $response->getSS() . "<br>";
+	echo "CS: " . $response->getCS() . "<br>";
 	echo "Ucet: " . $response->getClientAccountPrefix() . "-" . $response->getClientAccount() . "/" . $response->getClientBankCode() . "<br>";
 	echo "Parametre: ";
 	print_r($response->getParams());

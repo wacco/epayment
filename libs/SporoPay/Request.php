@@ -66,41 +66,17 @@ class Request extends Epayment\BaseRequest implements Epayment\IRequest {
 	}
 
 	/**
-	 * Vrati spravne naformatovanu cenu
-	 * @return string
-	 */
-	protected function getFormatedPrice() {
-		return number_format($this->price, 2, '.', '');
-	}
-
-	/**
-	 * Vrati spravne naformatovany VS
-	 * @return string
-	 */
-	protected function getFormatedVS() {
-		return str_pad($this->vs, 10, '0', STR_PAD_LEFT);
-	}
-
-	/**
-	 * Vrati spravne naformatovany SS
-	 * @return string
-	 */
-	protected function getFormatedSS() {
-		return str_pad($this->ss, 10, '0', STR_PAD_LEFT);
-	}
-
-	/**
 	 * Overi ci su vsetky udaje spravne a bude moct byt vygenerovany request
 	 * @return boolean
 	 */
 	public function validate() {
-		if (!preg_match('/^[0-9]*$/', $this->accountPrefix)) return false;
-		if (!preg_match('/^[0-9]+$/', $this->account)) return false;
-		if (!preg_match('/^([0-9]+|[0-9]*\\.[0-9]{0,2})$/', $this->getFormatedPrice())) return false;
-		if (!preg_match('/^[0-9]{10}$/', $this->getFormatedVS())) return false;
-		if (!preg_match('/^[0-9]{10}$/', $this->getFormatedSS())) return false;
-		if (preg_match('[\\;\\?\\&]', $this->returnUrl)) return false;
-		if (preg_match('[\\;\\?\\&]', $this->getParamsHash())) return false;
+		if (!preg_match('/^[0-9]*$/', $this->accountPrefix)) throw new Epayment\Exception('Chyba v prefixe uctu');
+		if (!preg_match('/^[0-9]+$/', $this->account)) throw new Epayment\Exception('Chyba v cisle uctu');
+		if (!preg_match('/^([0-9]+|[0-9]*\\.[0-9]{0,2})$/', $this->getFormatedPrice())) throw new Epayment\Exception('Chyba vo formate ceny');
+		if (!preg_match('/^[0-9]{10}$/', $this->getFormatedVS())) throw new Epayment\Exception('Chyba vo formate VS');
+		if (!preg_match('/^[0-9]{10}$/', $this->getFormatedSS())) throw new Epayment\Exception('Chyba vo formate SS');
+		if (preg_match('[\\;\\?\\&]', $this->returnUrl)) throw new Epayment\Exception('Chyba v navratovej URL');
+		if (preg_match('[\\;\\?\\&]', $this->getParamsHash())) throw new Epayment\Exception('Chyba v parametroch');
 		return $this->isValid = true;
 	}
 

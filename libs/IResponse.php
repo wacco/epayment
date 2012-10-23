@@ -72,6 +72,12 @@ interface IResponse {
 	public function getVS();
 
 	/**
+	 * Vrati konstantny symbol
+	 * @return string
+	 */
+	public function getCS();
+
+	/**
 	 * Vrati specificky symbol
 	 * @return string
 	 */

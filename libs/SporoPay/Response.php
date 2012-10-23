@@ -100,22 +100,22 @@ class Response extends Epayment\BaseResponse implements Epayment\IResponse {
 	 * @return boolean
 	 */
 	public function validate() {
-		if (!preg_match('/^[0-9]*$/', $this->accountPrefix)) return false;
-		if (!preg_match('/^[0-9]+$/', $this->account)) return false;
-		if (!preg_match('/^[0-9]+$/', $this->bankCode)) return false;
+		if (!preg_match('/^[0-9]*$/', $this->accountPrefix)) throw new Epayment\Exception('Chyba v prefixe uctu');
+		if (!preg_match('/^[0-9]+$/', $this->account)) throw new Epayment\Exception('Chyba v cisle uctu');
+		if (!preg_match('/^[0-9]+$/', $this->bankCode)) throw new Epayment\Exception('Chyba v kode banky');
 
-		if (!preg_match('/^[0-9]*$/', $this->clientAccountPrefix)) return false;
-		if (!preg_match('/^[0-9]+$/', $this->clientAccount)) return false;
-		if ($this->clientBankCode != '0900') return false;
+		if (!preg_match('/^[0-9]*$/', $this->clientAccountPrefix)) throw new Epayment\Exception('Chyba v prefixe uctu klienta');
+		if (!preg_match('/^[0-9]+$/', $this->clientAccount)) throw new Epayment\Exception('Chyba v cisle uctu klienta');
+		if ($this->clientBankCode != '0900') throw new Epayment\Exception('Chyba v kode banky klienta');
 
-		if (!preg_match('/^([0-9]+|[0-9]*\\.[0-9]{0,2})$/', $this->price)) return false;
-		if ($this->currency != 'EUR') return false;
-		if (!preg_match('/^[0-9]{10}$/', $this->vs)) return false;
-		if (!preg_match('/^[0-9]{10}$/', $this->ss)) return false;
-		if (preg_match('[\\;\\?\\&]', $this->returnUrl)) return false;
+		if (!preg_match('/^([0-9]+|[0-9]*\\.[0-9]{0,2})$/', $this->price)) throw new Epayment\Exception('Chyba vo formate ceny');
+		if ($this->currency != 'EUR') throw new Epayment\Exception('Chyba v mene');
+		if (!preg_match('/^[0-9]{10}$/', $this->vs)) throw new Epayment\Exception('Chyba vo formate VS');
+		if (!preg_match('/^[0-9]{10}$/', $this->ss)) throw new Epayment\Exception('Chyba vo formate SS');
+		if (preg_match('[\\;\\?\\&]', $this->returnUrl)) throw new Epayment\Exception('Chyba v navratovej URL');
 		$results = array('OK', 'NOK');
-		if (!in_array($this->result, $results)) return false;
-		if (!in_array($this->real, $results)) return false;
+		if (!in_array($this->result, $results)) throw new Epayment\Exception('Chyba v navratovom stave "result"');
+		if (!in_array($this->real, $results)) throw new Epayment\Exception('Chyba v navratovom stave "real"');
 		return $this->isValid = true;
 	}
 

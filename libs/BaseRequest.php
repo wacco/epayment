@@ -21,7 +21,13 @@ abstract class BaseRequest implements IRequest {
 	protected $bankCode;
 
 	/** @var string */
+	protected $clientName;
+
+	/** @var string */
 	protected $vs;
+
+	/** @var string */
+	protected $cs;
 
 	/** @var string */
 	protected $ss;
@@ -56,6 +62,19 @@ abstract class BaseRequest implements IRequest {
 		if ($accountPrefix) {
 			$this->accountPrefix = $accountPrefix;
 		}
+	}
+
+	/**
+	 * Nastavi meno klienta
+	 * @param string
+	 * @return IRequest
+	 */
+	public function setClientName($fullname) {
+		if (!is_string($fullname)) {
+			throw new Exception("Meno klienta musi byt string");
+		}
+		$this->clientName = $fullname;
+		return $this;
 	}
 
 	/**
@@ -94,6 +113,19 @@ abstract class BaseRequest implements IRequest {
 			throw new Exception("Zadany SS nieje string alebo je priliz dlhy");
 		}
 		$this->ss = $ss;
+		return $this;
+	}
+
+	/**
+	 * Nastavi konstantny symbol
+	 * @param string
+	 * @return IRequest
+	 */
+	public function setCS($cs) {
+		if (!is_string($cs) || strlen($cs) > 10) {
+			throw new Exception("Zadany CS nieje string alebo je priliz dlhy");
+		}
+		$this->cs = $cs;
 		return $this;
 	}
 
@@ -197,6 +229,14 @@ abstract class BaseRequest implements IRequest {
 	}
 
 	/**
+	 * Vrati konstantny symbol
+	 * @return string
+	 */
+	public function getCS() {
+		return $this->cs;
+	}
+
+	/**
 	 * Vrati specificky symbol
 	 * @return string
 	 */
@@ -210,6 +250,54 @@ abstract class BaseRequest implements IRequest {
 	 */
 	public function getParams() {
 		return $this->params;
+	}
+
+	/**
+	 * Vrati meno klienta
+	 * @return string
+	 */
+	protected function getClientName() {
+		return urldecode($this->clientName);
+	}
+
+	/**
+	 * Vrati spravne naformatovane meno klienta
+	 * @return string
+	 */
+	protected function getFormatedClientName() {
+		return urlencode($this->clientName);
+	}
+
+	/**
+	 * Vrati spravne naformatovanu cenu
+	 * @return string
+	 */
+	protected function getFormatedPrice() {
+		return number_format($this->price, 2, '.', '');
+	}
+
+	/**
+	 * Vrati spravne naformatovany VS
+	 * @return string
+	 */
+	protected function getFormatedVS() {
+		return str_pad($this->vs, 10, '0', STR_PAD_LEFT);
+	}
+
+	/**
+	 * Vrati spravne naformatovany CS
+	 * @return string
+	 */
+	protected function getFormatedCS() {
+		return str_pad($this->cs, 4, '0', STR_PAD_LEFT);
+	}
+
+	/**
+	 * Vrati spravne naformatovany SS
+	 * @return string
+	 */
+	protected function getFormatedSS() {
+		return str_pad($this->ss, 10, '0', STR_PAD_LEFT);
 	}
 
 	/**
